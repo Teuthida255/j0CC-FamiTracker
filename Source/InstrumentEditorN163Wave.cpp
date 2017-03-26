@@ -34,6 +34,8 @@
 #include "NumConv.h"		// // //
 #include "sv_regex.h"		// // //
 #include <array>		// // //
+#include <sstream>
+
 
 // CInstrumentEditorN163Wave dialog
 
@@ -213,10 +215,14 @@ void CInstrumentEditorN163Wave::OnPresetSawtooth()
 
 void CInstrumentEditorN163Wave::OnBnClickedCopy()
 {
-	// Assemble a MML string
 	CString Str;
-	for (auto x : m_pInstrument->GetSamples(m_iWaveIndex))		// // //
-		Str.AppendFormat(_T("%i "), x);
+	// Assemble multiple MML strings
+	for (int wave=0; wave < m_pInstrument->GetWaveCount(); ++wave) {
+		for (auto x : m_pInstrument->GetSamples(wave)) {
+			Str.AppendFormat(_T("%i "), x);
+		}
+		Str.Append(";\n");
+	}
 
 	CClipboard Clipboard(this, CF_TEXT);
 
@@ -241,17 +247,56 @@ void CInstrumentEditorN163Wave::OnBnClickedPaste()
 	if (Clipboard.IsDataAvailable()) {
 		LPTSTR text = (LPTSTR)Clipboard.GetDataPointer();
 		if (text != NULL)
-			ParseString(text);
+			ParseManyStrings(std::string(text));
 	}
 }
 
-void CInstrumentEditorN163Wave::ParseString(LPCTSTR pString)
+void CInstrumentEditorN163Wave::ParseManyStrings(std::string pStrings)
 {
+	while (m_pInstrument->GetWaveCount() > 1) {
+		OnBnClickedN163Delete();
+	}
+
+	std::stringstream waveStream(pStrings);
+	std::string segment;
+	std::vector<std::string> waves;
+
+	while (std::getline(waveStream, segment, ';')) {
+		waves.push_back(segment);
+	}
+
+
+	bool first = true;
+	for (size_t i = 0; i < waves.size(); i++) {
+		std::string waveform = waves[i];
+		for (size_t j = 0; j < waveform.size(); j++) {
+			if (!isspace(waveform[j])) {
+				goto parse;
+			}
+		}
+		continue;
+	
+	parse:
+		if (first) {
+			first = false;
+		} else {
+			OnBnClickedN163Add();
+		}
+		ParseString(waveform, i);
+	}
+}
+
+void CInstrumentEditorN163Wave::ParseString(std::string pString, int waveIndex)
+{
+	if (waveIndex == -1) {
+		waveIndex = m_iWaveIndex;
+	}
+
 	int i = 0;
 	int im = WaveSizeAvailable();
-	for (auto x : re::tokens(pString)) {		// // //
+	for (auto x : re::tokens(pString.c_str())) {		// // //
 		int value = CSequenceInstrumentEditPanel::ReadStringValue(x.str());
-		m_pInstrument->SetSample(m_iWaveIndex, i, std::clamp(value, 0, 15));		// // //
+		m_pInstrument->SetSample(waveIndex, i, std::clamp(value, 0, 15));		// // //
 		if (++i >= im)
 			break;
 	}
@@ -388,7 +433,7 @@ void CInstrumentEditorN163Wave::OnKeyReturn()
 	// Parse MML string
 	CString text;
 	GetDlgItemText(IDC_MML, text);
-	ParseString(text);
+	ParseString(std::string(text));
 }
 
 void CInstrumentEditorN163Wave::OnLvnItemchangedN163Waves(NMHDR *pNMHDR, LRESULT *pResult)		// // //
