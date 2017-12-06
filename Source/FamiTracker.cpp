@@ -897,6 +897,7 @@ void CFTCommandLineInfo::ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLas
 				CString param = pszParam;
 				TCHAR *str_end = const_cast<LPTSTR>(pszParam) + param.GetLength();
 				TCHAR *str_end2;
+				errno = 0;
 				track_ = _tcstoul(pszParam, &str_end2, 10);
 				if (errno || str_end2 != str_end)
 					m_bRender = false;
@@ -914,6 +915,7 @@ void CFTCommandLineInfo::ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLas
 					render_type_ = render_type_t::Loops;
 				TCHAR *str_end = const_cast<LPTSTR>(pszParam) + param.GetLength();
 				TCHAR *str_end2;
+				errno = 0;
 				render_param_ = _tcstoul(pszParam, &str_end2, 10);
 				if (errno || str_end2 != str_end)
 					m_bRender = false;
