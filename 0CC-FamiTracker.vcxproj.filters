@@ -759,6 +759,12 @@
     <ClCompile Include="Source\FamiTrackerDocOldIO.cpp">
       <Filter>Source Files\Document Utilities</Filter>
     </ClCompile>
+    </ClCompile>
+    <ClCompile Include="Source\APU\MixerLevels.cpp">
+      <Filter>Source Files\Sound Driver\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\APU\MixerChannel.cpp">
+      <Filter>Source Files\Sound Driver\Audio</Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Exception.h">
