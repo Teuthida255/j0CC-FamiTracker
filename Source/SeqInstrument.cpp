@@ -161,9 +161,13 @@ bool CSeqInstrument::LoadFTI(CSimpleFile &File, int iVersion)
 			for (int j = 0; j < Count; ++j)
 				if (j < Count2) pSeq->SetItem(j, File.ReadChar());
 		}
-		if (GetSequence(i) && GetSequence(i)->GetItemCount() > 0)
+		int Index = m_pInstManager->AddSequence(m_iType, i, pSeq, this);
+		if (Index == -1) {
+			for (unsigned int j = 0; j < i; ++j)
+				SetSequence(j, nullptr);
 			throw CModuleException::WithMessage("Document has no free sequence slot");
-		m_pInstManager->SetSequence(m_iType, i, GetSeqIndex(i), pSeq);
+		}
+		SetSeqIndex(i, Index);
 	}
 	catch (CModuleException e) {
 		e.AppendError("At %s sequence,", GetSequenceName(i));
