@@ -86,15 +86,15 @@ char CSimpleFile::ReadChar()
 
 short CSimpleFile::ReadShort()
 {
-	char buf[2];
-	m_fFile.read(buf, 2);
+	uint8_t buf[2];
+	m_fFile.read((char*)buf, 2);
 	return buf[0] | (buf[1] << 8);
 }
 
 int CSimpleFile::ReadInt()
 {
-	char buf[4];
-	m_fFile.read(buf, 4);
+	uint8_t buf[4];
+	m_fFile.read((char*)buf, 4);
 	return buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
 }
 
